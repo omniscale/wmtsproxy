@@ -1,0 +1,4 @@
+Pillow==2.3.1
+PyYAML==3.11
+requests==2.2.1
+MapProxy>=1.7.0a-20140411

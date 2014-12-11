@@ -1,0 +1,71 @@
+API
+===
+
+list
+----
+
+Request type: POST
+
+Request parameters:
+
+type
+    Type of capabilities document. Valid values are `wms`, `wmts`
+url
+    URL of capabilities document
+
+Successfull response:
+
+JSON with list of layers and SRS for wms or matrix set for wmts
+
+Error response
+
+JSON dict with `error` as key and message text as value
+
+
+add
+----
+
+Request type: POST
+
+Request parameters:
+
+type
+    Type of capabilities document. Valid values are `wms`, `wmts`
+url
+    URL of capabilities document
+layer
+    Name of layer to add
+srs/matrix_set
+    SRS code (wms) or matrix set (wmts)
+
+
+Successfull response:
+
+JSON dict with `mapproxy_id` as key and mapproxy id is value
+
+Error response
+
+JSON dict with `error` as key and message text as value
+
+
+Examples
+--------
+
+API url might be "http://192.168.107.162:8000"
+
+
+Get layerlist from wmts capabilities:
+
+    $ curl --data "type=wmts&url=http://map1.vis.earthdata.nasa.gov/wmts-geo/1.0.0/WMTSCapabilities.xml" [api_url]/list
+
+Add layer from  wmts capabilities:
+
+    $ curl --data "type=wmts&url=http://map1.vis.earthdata.nasa.gov/wmts-geo/1.0.0/WMTSCapabilities.xml&layer=Sea_Surface_Temp_Blended&matrix_set=EPSG4326_1km" [api_url]/add
+
+Get layerlist from wms capabilities:
+
+    $ curl --data "type=wms&url=http://osm.omniscale.net/proxy/service?REQUEST=GetCapabilities" [api_url]/list
+
+Add Layer from wms capabilities:
+
+    $  curl --data "type=wms&url=http://osm.omniscale.net/proxy/service?REQUEST=GetCapabilities&layer=osm&srs=EPSG:25832" [api_url]/add
