@@ -43,9 +43,21 @@ def merge_bbox(a, b):
     )
 
 
-crs_urn_re = re.compile('urn:ogc:def:crs:EPSG:(\d*.?\d*):(\d+)')
+crs_urn_re = re.compile('urn:ogc:def:crs:EPSG:(\d*.?\d*:?)*:(\d+)$')
 
 def crs_to_mapproxy_srs(crs):
+    """
+    >>> crs_to_mapproxy_srs('EPSG:4326') == SRS(4326)
+    True
+    >>> crs_to_mapproxy_srs('urn:ogc:def:crs:EPSG::4326') == SRS(4326)
+    True
+    >>> crs_to_mapproxy_srs('urn:ogc:def:crs:EPSG:6.18:4326') == SRS(4326)
+    True
+    >>> crs_to_mapproxy_srs('urn:ogc:def:crs:EPSG:6.18::4326') == SRS(4326)
+    True
+    >>> crs_to_mapproxy_srs('urn:ogc:def:crs:EPSG:6.18:3:4326') == SRS(4326)
+    True
+    """
     if crs.startswith('EPSG:'):
         return SRS(crs)
     if crs == 'urn:ogc:def:crs:OGC:1.3:CRS84':
