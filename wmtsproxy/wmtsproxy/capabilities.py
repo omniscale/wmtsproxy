@@ -67,15 +67,18 @@ def wmts_cap_dict(cap):
 
     layers = []
     for layer_name, layer in cap_layers:
-        layers.append({
+        layer_obj = {
             'name': layer_name,
             'title': layer['title'],
             'matrix_sets': [matrix_set['id'] for matrix_set in layer['matrix_sets']],
             'llbbox': layer['bbox'],
-        })
+        }
         dimension = wmts_layer_dimensions(layer)
         if dimension:
-            layers[-1]['dimensions'] = dimension
+            layer_obj['dimensions'] = dimension
+        if 'url_template' in layer:
+            layer_obj['url_template'] = layer['url_template']
+        layers.append(layer_obj)
     return {
         'type': 'wmts',
         'title': cap.service['title'],
