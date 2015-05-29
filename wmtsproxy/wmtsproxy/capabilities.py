@@ -85,9 +85,6 @@ def wmts_cap_dict(cap):
         'layers': layers,
     }
 
-def wmts_layer_resourceURL(layer):
-    pass
-
 def wmts_layer_dimensions(layer):
     dimensions = {}
     for dim in layer['dimensions']:
