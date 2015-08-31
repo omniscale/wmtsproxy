@@ -17,7 +17,11 @@ def mangle_name(name):
     """remove unsafe characters from name"""
     return name.replace(':', '_')
 
-def mapproxy_conf_from_wms_capabilities(mapproxy_conf, cap, service_name, layer_name=None, srs=None):
+def mapproxy_conf_from_wms_capabilities(mapproxy_conf, cap, service_name, layer_name=None, srs=None, timestamp=None):
+    cache_suffix = '_cache'
+    if timestamp:
+        cache_suffix = '_%d_cache' % timestamp
+
     def _add_source(mapproxy_conf, layer_name, layer, srs):
         source = {
             'type': 'wms',
@@ -49,7 +53,7 @@ def mapproxy_conf_from_wms_capabilities(mapproxy_conf, cap, service_name, layer_
         mapproxy_conf['sources'][mangle_name(layer_name) + '_source'] = source
 
     def _add_cache(mapproxy_conf, service_name, layer_name):
-        mapproxy_conf['caches'][mangle_name(service_name) + '_cache'] = {
+        mapproxy_conf['caches'][mangle_name(service_name) + cache_suffix] = {
             'sources': [mangle_name(layer_name) + '_source'],
             'grids': ['webmercator'],
             'cache': {
@@ -61,7 +65,7 @@ def mapproxy_conf_from_wms_capabilities(mapproxy_conf, cap, service_name, layer_
         mapproxy_conf['layers'].append({
             'name': 'map',
             'title': layer['title'],
-            'sources': [mangle_name(service_name) + '_cache'],
+            'sources': [mangle_name(service_name) + cache_suffix],
         })
 
     if layer_name is None:
@@ -93,7 +97,13 @@ def mapproxy_conf_from_wms_capabilities(mapproxy_conf, cap, service_name, layer_
     return mapproxy_conf
 
 
-def mapproxy_conf_from_wmts_capabilities(mapproxy_conf, cap, service_name, layer_name=None, matrix_set_id=None, dimensions=None):
+def mapproxy_conf_from_wmts_capabilities(mapproxy_conf, cap, service_name, layer_name=None, matrix_set_id=None, dimensions=None, timestamp=None):
+    cache_suffix = '_cache'
+    tmpcache_suffix = '_tmpcache'
+    if timestamp:
+        cache_suffix = '_%d_cache' % timestamp
+        tmpcache_suffix = '_%d_tmpcache' % timestamp
+
     def _add_grid(mapproxy_conf, grid):
         if grid['name'] in ['GLOBAL_GEODETIC', 'GLOBAL_MERCATOR', 'GLOBAL_WEBMERCATOR']:
             grid['name'] += '_'
@@ -110,11 +120,11 @@ def mapproxy_conf_from_wmts_capabilities(mapproxy_conf, cap, service_name, layer
         mapproxy_conf['layers'].append({
             'name': 'map',
             'title': layer['title'],
-            'sources': [mangle_name(service_name) + '_cache']
+            'sources': [mangle_name(service_name) + cache_suffix]
         })
 
     def _add_cache(mapproxy_conf, service_name, layer_name, grid_name):
-        mapproxy_conf['caches'][mangle_name(service_name) + '_tmpcache'] = {
+        mapproxy_conf['caches'][mangle_name(service_name) + tmpcache_suffix] = {
             'grids': [grid_name],
             'sources': [mangle_name(layer_name) + '_source'],
             'cache': {
@@ -122,9 +132,9 @@ def mapproxy_conf_from_wmts_capabilities(mapproxy_conf, cap, service_name, layer
             },
         }
 
-        mapproxy_conf['caches'][mangle_name(service_name) + '_cache'] = {
+        mapproxy_conf['caches'][mangle_name(service_name) + cache_suffix] = {
             'grids': ['webmercator'],
-            'sources': [mangle_name(service_name) + '_tmpcache'],
+            'sources': [mangle_name(service_name) + tmpcache_suffix],
             'meta_size': [6, 6],
             'meta_buffer': 0,
             'concurrent_tile_creators': 4,
@@ -255,10 +265,12 @@ def mapproxy_config_from_csv(id, base_file, csv_config_file=None):
 
     if rec.type == 'wms':
         cap = parsed_wms_capabilities(rec.url)
-        return mapproxy_conf_from_wms_capabilities(mapproxy_conf, cap, rec.id, rec.layer_name, rec.system_id)
+        return mapproxy_conf_from_wms_capabilities(mapproxy_conf, cap, rec.id, rec.layer_name, rec.system_id,
+            timestamp=rec.timestamp)
     elif rec.type == 'wmts':
         cap = parsed_wmts_capabilities(rec.url)
-        return mapproxy_conf_from_wmts_capabilities(mapproxy_conf, cap, rec.id, rec.layer_name, rec.system_id, rec.dimensions)
+        return mapproxy_conf_from_wmts_capabilities(mapproxy_conf, cap, rec.id, rec.layer_name, rec.system_id, rec.dimensions,
+            timestamp=rec.timestamp)
     else:
         raise UserError('No valid capabilities type given')
 
