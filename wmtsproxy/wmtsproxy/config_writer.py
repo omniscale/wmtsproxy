@@ -231,7 +231,7 @@ def write_mapproxy_conf(mapproxy_conf, filename):
 
 def mapproxy_config_from_csv(id, base_file, csv_config_file=None):
     try:
-        cap_type, cap_url, layer_name, system_id, dimensions = csv.from_csv(id, csv_config_file)
+        rec = csv.from_csv(id, csv_config_file)
     except ServiceError as ex:
         raise ex
     except Exception as ex:
@@ -253,12 +253,12 @@ def mapproxy_config_from_csv(id, base_file, csv_config_file=None):
         'globals': {},
     }
 
-    if cap_type == 'wms':
-        cap = parsed_wms_capabilities(cap_url)
-        return mapproxy_conf_from_wms_capabilities(mapproxy_conf, cap, id, layer_name, system_id)
-    elif cap_type == 'wmts':
-        cap = parsed_wmts_capabilities(cap_url)
-        return mapproxy_conf_from_wmts_capabilities(mapproxy_conf, cap, id, layer_name, system_id, dimensions)
+    if rec.type == 'wms':
+        cap = parsed_wms_capabilities(rec.url)
+        return mapproxy_conf_from_wms_capabilities(mapproxy_conf, cap, rec.id, rec.layer_name, rec.system_id)
+    elif rec.type == 'wmts':
+        cap = parsed_wmts_capabilities(rec.url)
+        return mapproxy_conf_from_wmts_capabilities(mapproxy_conf, cap, rec.id, rec.layer_name, rec.system_id, rec.dimensions)
     else:
         raise UserError('No valid capabilities type given')
 
