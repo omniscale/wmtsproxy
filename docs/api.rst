@@ -3,7 +3,7 @@ Admin API
 
 The WMTSProxy comes with a simple HTTP API.
 
-All endpoitns support JSONP with the `callback` parameter.
+All endpoints support JSONP with the `callback` parameter.
 
 
 The following endpoints are available:
@@ -160,3 +160,5 @@ WMTS services also support time dimensions. WMTSProxy will use the `default` val
         "mapproxy_id": "map1_vis_earthdata_nasa_gov_MODIS_Terra_SurfaceReflectance_Bands143_EPSG4326_500m_time_2014-04-01"
     }
 
+
+Additional `/add`-requests with the same set of parameters will cause WMTSProxy to rebuild the MapProxy configuration. WMTSProxy will also create a new tile cache in this case.
